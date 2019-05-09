@@ -10,15 +10,19 @@ def index(request):
     app_id = 'c0d78490bfcbfdc9dd77405dc48245d0'
     url = 'https://api.openweathermap.org/data/2.5/weather?q={}&units=metric&appid=' + app_id
 
-    if (request.method == 'POST'):
+    cities = City.objects.all()
+    cities_name = set([city.name for city in cities])
+    cities_information = []
 
+    if (request.method == 'POST'):
         form = CityForm(request.POST)
         form.save()
+        if request.POST.get('name') in cities_name:
+            city_to_be_deleted = City.objects.filter(name=request.POST.get('name'))[1]
+            city_to_be_deleted.delete()
 
     form = CityForm()
 
-    cities = City.objects.all()
-    cities_information = []
 
     for city in cities:
         response = requests.get(url.format(city.name)).json()
