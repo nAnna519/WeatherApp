@@ -8,6 +8,7 @@ from .forms import CityForm
 
 def index(request):
     app_id = 'c0d78490bfcbfdc9dd77405dc48245d0'
+    message = ''
     url = 'https://api.openweathermap.org/data/2.5/weather?q={}&units=metric&appid=' + app_id
 
     cities = City.objects.all()
@@ -15,28 +16,38 @@ def index(request):
     cities_information = []
 
     if (request.method == 'POST'):
+        name = request.POST.get('name').lower()
         form = CityForm(request.POST)
-        form.save()
-        if request.POST.get('name') in cities_name:
-            city_to_be_deleted = City.objects.filter(name=request.POST.get('name'))[1]
+        new_city = form.save(commit=False)
+        new_city.name = name
+        new_city.save()
+        if name in cities_name:
+            city_to_be_deleted = City.objects.filter(name=name)[0]
             city_to_be_deleted.delete()
 
     form = CityForm()
+    cities = City.objects.all()
 
 
     for city in cities:
-        response = requests.get(url.format(city.name)).json()
+        try:
+            response = requests.get(url.format(city.name)).json()
 
-        city_info = {
-            'city': city.name,
-            'temp': response['main']['temp'],
-            'icon': response['weather'][0]['icon']
-        }
-        cities_information.append(city_info)
-
+            city_info = {
+                'city': response['name'],
+                'temp': response['main']['temp'],
+                'icon': response['weather'][0]['icon']
+            }
+            cities_information.append(city_info)
+        except KeyError:
+            message = response['message']
+            city_to_be_deleted = City.objects.filter(name=city.name)
+            city_to_be_deleted.delete()
+    cities_information.reverse()
     context = {
         'info': cities_information,
-        'form': form
+        'form': form,
+        'message': message
     }
 
     return render(request, 'weather/index.html', context)

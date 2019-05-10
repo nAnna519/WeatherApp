@@ -18,13 +18,18 @@
         <div class="row">
             <div class="col-5 offset-0">
                 <h1> Weather in your city</h1>
-                <form action="" method="post">
-                    {% csrf_token %}
-                    <label for="city"> City</label>
-                    {{ form.name }}
-                    <input type="submit" name="send" value="Find" class="mt-2 btn btn-danger">
+                 {% if message  %}
+                    <p style="color:red;">{{message}}</p>
+                    {% endif %}
+                    {% if form  %}
+                    <form action="" method="post">
+                        {% csrf_token %}
+                        <label for="city"> City</label>
+                        {{ form.name }}
+                        <input type="submit" name="send" value="Find" class="mt-2 btn btn-danger">
 
-                </form>
+                    </form>
+            {% endif %}
 
             </div>
 
