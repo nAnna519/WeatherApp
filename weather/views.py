@@ -1,5 +1,5 @@
 import requests
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import City
 from .forms import CityForm
 
@@ -51,3 +51,39 @@ def index(request):
     }
 
     return render(request, 'weather/index.html', context)
+
+
+def delete(request, name):
+    if (request.method == 'POST'):
+        city_to_be_deleted = City.objects.filter(name=name.lower())
+        city_to_be_deleted.delete()
+
+    cities = City.objects.all()
+    cities_information = []
+
+    form = CityForm()
+    app_id = 'c0d78490bfcbfdc9dd77405dc48245d0'
+    url = 'https://api.openweathermap.org/data/2.5/weather?q={}&units=metric&appid=' + app_id
+
+    for city in cities:
+        try:
+            response = requests.get(url.format(city.name)).json()
+
+            city_info = {
+                'city': response['name'],
+                'temp': response['main']['temp'],
+                'icon': response['weather'][0]['icon']
+            }
+            cities_information.append(city_info)
+        except KeyError:
+            message = response['message']
+            city_to_be_deleted = City.objects.filter(name=city.name)
+            city_to_be_deleted.delete()
+    cities_information.reverse()
+    context = {
+        'info': cities_information,
+        'form': form
+    }
+
+    return redirect('/')
+
