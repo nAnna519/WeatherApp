@@ -1,8 +1,6 @@
 import requests
 import pandas as pd
-from django.shortcuts import render, redirect
-from .models import City
-from .forms import CityForm
+from .weather_model import icon_dict
 
 
 def get_city_info(city):
@@ -26,8 +24,7 @@ def get_city_info(city):
     symbol_var.append(symbol_var_list)
     data = pd.DataFrame()
     data['symb'] = symbol_var_list
-    symbol_var = data['symb'].map({'01d': 0, '04d': 1, '03d': 2, '10d': 3, '02d': 4, '10n': 5,
-                                                       '04n': 6, '01n': 7, '03n': 8, '13d': 9, '02': 11})
+    symbol_var = data['symb'].map(icon_dict)
 
 
     return {'temp' : temperature, 'hum' : humidity, 'symbol' : symbol_var}
