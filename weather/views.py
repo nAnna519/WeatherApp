@@ -2,9 +2,17 @@ import requests
 from django.shortcuts import render, redirect
 from .models import City
 from .forms import CityForm
+from .weather_model import reg_tree, regressor, icon_dict
+from .get_data import get_city_info
+import pandas as pd
+from requests.exceptions import ConnectionError
+
 
 # Create your views here.
 
+dictionary = {}
+regressor = regressor
+reg_tree = reg_tree
 
 def index(request):
     app_id = 'c0d78490bfcbfdc9dd77405dc48245d0'
@@ -29,6 +37,7 @@ def index(request):
     cities = City.objects.all()
 
 
+
     for city in cities:
         try:
             response = requests.get(url.format(city.name)).json()
@@ -39,6 +48,33 @@ def index(request):
                 'icon': response['weather'][0]['icon']
             }
             cities_information.append(city_info)
+            print(ke)
+
+            dictionary[city.name] = get_city_info(city.name)
+        except ConnectionError:
+            information = []
+            try:
+                for i in range(5):
+                    information.append(dictionary[city.name]['temp'][0][i])
+                    information.append(dictionary[city.name]['symbol'][i])
+                    information.append(dictionary[city.name]['hum'][0][i])
+                    # data_frame['temp_' + str(i)] = [temp[i] for temp in dictionary[city.name]['temp']]
+                    # data_frame['symbol_var_' + str(i)] = [symbol[i] for symbol in dictionary[city.name]['symbol']]
+                    # data_frame['hum_' + str(i)] = [hum[i] for hum in dictionary[city.name]['hum']]
+                icon_predict = reg_tree.predict([information])
+                new_dict = dict(zip(icon_dict.values(), icon_dict.keys()))
+
+                city_info = {
+                    'city': city.name,
+                    'temp': regressor.predict([information]),
+                    # 'icon': response['weather'][0]['icon']
+                    'icon' : new_dict[icon_predict.tolist()[0]]
+                }
+                cities_information.append(city_info)
+            except KeyError:
+                message = 'No internet connection.'
+                city_to_be_deleted = City.objects.filter(name=city.name)
+                city_to_be_deleted.delete()
         except KeyError:
             message = response['message']
             city_to_be_deleted = City.objects.filter(name=city.name)
