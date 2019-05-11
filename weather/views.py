@@ -48,7 +48,6 @@ def index(request):
                 'icon': response['weather'][0]['icon']
             }
             cities_information.append(city_info)
-            print(ke)
 
             dictionary[city.name] = get_city_info(city.name)
         except ConnectionError:
@@ -66,7 +65,7 @@ def index(request):
 
                 city_info = {
                     'city': city.name,
-                    'temp': regressor.predict([information]),
+                    'temp': round(regressor.predict([information]), 2),
                     # 'icon': response['weather'][0]['icon']
                     'icon' : new_dict[icon_predict.tolist()[0]]
                 }

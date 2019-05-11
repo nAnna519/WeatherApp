@@ -8,7 +8,7 @@ import os
 
 
 icon_dict = {'01d': 0, '04d': 1, '03d': 2, '10d': 3, '02d': 4, '10n': 5,
-                                                         '04n': 6, '01n': 7, '03n': 8, '13d': 9, '02': 11}
+                                                         '04n': 6, '01n': 7, '03n': 8, '13d': 9, '02n': 10}
 
 def function():
     dirname = os.path.dirname(__file__)
@@ -37,7 +37,7 @@ def function():
 
     appid = 'c0d78490bfcbfdc9dd77405dc48245d0'
 
-    for i in range(5):
+    for i in range(500):
         try:
             res = requests.get("http://api.openweathermap.org/data/2.5/forecast",
                                params={'q': s_city[i], 'units': 'metric', 'APPID': appid})
