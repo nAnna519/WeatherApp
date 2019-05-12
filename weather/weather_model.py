@@ -46,7 +46,7 @@ def weather_modeling():
 
     appid = 'c0d78490bfcbfdc9dd77405dc48245d0'
 
-    for i in range(5):
+    for i in range(500):
         try:
             res = requests.get("http://api.openweathermap.org/data/2.5/forecast",
                                params={'q': s_city[i], 'units': 'metric', 'APPID': appid})
